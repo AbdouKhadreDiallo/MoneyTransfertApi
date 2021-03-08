@@ -1,0 +1,43 @@
+# config/packages/security.yaml
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        reset_pwd: 
+            pattern: ^/api/reset_password
+            anonymous: true
+        login:
+            pattern: ^/api/login
+            user_checker: App\Security\UserChecker
+            stateless: false
+            anonymous: true
+            json_login:
+                check_path: /api/login
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        api:
+            pattern: ^/api
+            stateless: true
+            anonymous: True
+            provider: app_user_provider
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+        
+
+    access_control:
+        - { path: ^/api/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Allows accessing the Swagger UI
+        - { path: ^/api/reset_password, roles: IS_ANONYMOUS }
+        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
